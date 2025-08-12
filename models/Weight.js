@@ -2,11 +2,11 @@ const { Schema, model } = require('mongoose')
 
 const schema = new Schema({
   date: {
-    type: String,
+    type: Date,
     required: true
   },
   weight: {
-    type: Date,
+    type: Number,
     required: true
   },
 })

@@ -12,6 +12,20 @@
     <canvas id="weightChart" width="600" height="300"></canvas>
 
     <script>
+        let filteredWeights = <%- JSON.stringify(filteredWeights) %>;
+        let data = []
+
+        filteredWeights.sort(function(a, b) {
+            return new Date(a.date) - new Date(b.date);
+        })
+
+        for (let i = 0; i < filteredWeights.length; i++) {
+            data.push(filteredWeights[i].weight)
+        }
+        console.log(filteredWeights)
+
+
+        console.log(data)
         const ctx = document.getElementById('weightChart').getContext('2d');
         const chart = new Chart(ctx, {
             type: 'line',
@@ -19,7 +33,7 @@
                 labels: ["01", "02", "03", "04", "05", "06", "07"],
                 datasets: [{
                     label: 'Вес (кг)',
-                    data: [75.5, 75.3, 75.2, 75.1, 75.0, 74.8, 74.7],
+                    data: data,
                     borderColor: 'blue',
                     backgroundColor: 'rgba(0, 0, 255, 0.1)',
                     tension: 0.3

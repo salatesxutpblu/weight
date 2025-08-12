@@ -9,9 +9,13 @@
     <h1>📅 Данные по месяцам</h1>
 
     <ul>
-        <li><a href="/weights/2025/01">Январь 2025</a></li>
-        <li><a href="/weights/2025/02">Февраль 2025</a></li>
-        <li><a href="/weights/2025/03">Март 2025</a></li>
+            <% filteredMonthsAndYear.forEach(item => { %>
+                <li>
+                    <a href="/weights/<%= item.year %>/<%= item.numberMonth %>">
+                        <%= item.month %> <%= item.year %>
+                    </a>
+                </li>
+            <% }) %>
     </ul>
 
     <p><a href="/weights/new">➕ Добавить запись</a></p>
