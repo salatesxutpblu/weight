@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>График веса — <%= month %> <%= year %></title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>📊 <%= month %> <%= year %></h1>
+
+    <canvas id="weightChart" width="600" height="300"></canvas>
+
+    <script>
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ["01", "02", "03", "04", "05", "06", "07"],
+                datasets: [{
+                    label: 'Вес (кг)',
+                    data: [75.5, 75.3, 75.2, 75.1, 75.0, 74.8, 74.7],
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    </script>
+
+    <p>📉 Минимальный вес: <strong>74.7 кг</strong></p>
+    <p>📈 Максимальный вес: <strong>75.5 кг</strong></p>
+    <p>⚖ Средний вес: <strong>75.1 кг</strong></p>
+
+    <p><a href="/">⬅ Вернуться к списку месяцев</a></p>
+</body>
+</html>
+
