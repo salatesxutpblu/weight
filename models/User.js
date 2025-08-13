@@ -1,18 +1,14 @@
 const { Schema, model } = require('mongoose')
 
 const schema = new Schema({
-  date: {
-    type: Date,
-    required: true
-  },
-  weight: {
-    type: Number,
-    required: true
-  },
   username: {
     type: String,
     required: true
-  }
+  },
+  password: {
+    type: String,
+    required: true
+  },
 })
 
-module.exports = model('Weight', schema)
+module.exports = model('User', schema)
