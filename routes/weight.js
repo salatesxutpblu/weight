@@ -122,14 +122,18 @@ router.get('/', async function(req, res) {
         if (tempDate.getMonth() === 10) { month = 'Октябрь' }
         if (tempDate.getMonth() === 11) { month = 'Ноябрь' }
         if (tempDate.getMonth() === 12) { month = 'Декабрь' }
-        if (filteredMonthsAndYear.includes(year) && filteredMonthsAndYear.includes(month)) {
-            return
+        if (
+        filteredMonthsAndYear.some(
+          obj =>
+            obj.year === year &&
+            obj.month === month &&
+            obj.numberMonth === numberMonth
+        )
+        ) {
+        } else {
+        filteredMonthsAndYear.push({ year, month, numberMonth });
         }
-        filteredMonthsAndYear.push({
-            year,
-            month,
-            numberMonth
-        })
+
         }
     }
     res.render('index', {
@@ -138,12 +142,21 @@ router.get('/', async function(req, res) {
     )
 })
 router.get('/weights/new', async function(req, res) {
+  let username = getUsername(req)
+    if (!username) {
+        res.redirect('/login')
+        return
+    }
     res.render('new-weight')
 })
 router.get('/weights/:year/:month', async function(req, res) {
     let filteredWeights = []
     let month = ''
     let username = getUsername(req)
+    if (!username) {
+        res.redirect('/login')
+        return
+    }
     let weights = await Weight.find().lean()
     for (let i = 0; i < weights.length; i++) {
     let tempDate = new Date(weights[i].date)
@@ -213,6 +226,7 @@ router.post('/weights/new', async function(req, res) {
         date: new Date(date),
         weight: fixWeight,
         username: username,
+        comment: req.body.comment
     })
     await newWeight.save()
     res.redirect('/')

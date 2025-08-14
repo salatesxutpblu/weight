@@ -12,6 +12,10 @@ const schema = new Schema({
   username: {
     type: String,
     required: true
+  },
+  comment: {
+    type: String,
+    required: false
   }
 })
 

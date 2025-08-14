@@ -5,6 +5,7 @@
 <script>
     let filteredWeights = <%- JSON.stringify(filteredWeights) %>;
     let data = []
+    let comments = []
 
     filteredWeights.sort(function(a, b) {
         return new Date(a.date) - new Date(b.date);
@@ -12,43 +13,70 @@
 
     for (let i = 0; i < filteredWeights.length; i++) {
         data.push(filteredWeights[i].weight)
+        comments.push(filteredWeights[i].comment)
     }
-    console.log(filteredWeights)
 
 
-    console.log(data)
-    const ctx = document.getElementById('weightChart').getContext('2d');
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ["01", "02", "03", "04", "05", "06", "07"],
-            datasets: [{
-                label: 'Вес (кг)',
-                data: data,
-                borderColor: 'blue',
-                backgroundColor: 'rgba(0, 0, 255, 0.1)',
-                tension: 0.3
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: false
+const ctx = document.getElementById('weightChart').getContext('2d');
+
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ["01", "02", "03", "04", "05", "06", "07"],
+        datasets: [{
+            label: 'Вес (кг)',
+            title: 'ddd',
+            data: data,
+            comments: comments,
+            borderColor: 'blue',
+            backgroundColor: 'rgba(0, 0, 255, 0.1)',
+            tension: 0.3
+        }]
+    },
+    options: {
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let datasetLabel = context.dataset.label || ''
+                        let value = `${datasetLabel}: ${context.formattedValue} кг`
+                        let comment = `Комментарий: ${context.dataset.comments[context.dataIndex] || ''}`
+                        return [value, comment]
+                    }
                 }
             }
+        },
+        scales: {
+            y: {
+                beginAtZero: false
+            }
         }
-    });
+    }
+});
+
 </script>
 
 <p>📉 Минимальный вес: <strong class="min-weight">74.7 кг</strong></p>
 <p>📈 Максимальный вес: <strong class="max-weight">75.5 кг</strong></p>
 <p>⚖ Средний вес: <strong class="middle-weight">75.1 кг</strong></p>
 
+<div class="all-weights-month">
+
+</div>
+
 <p><a href="/">⬅ Вернуться к списку месяцев</a></p>
 <script>
     let minWeight = document.querySelector('.min-weight')
     let maxWeight = document.querySelector('.max-weight')
     let middleWeight = document.querySelector('.middle-weight')
+    let allWeightsInMonth = document.querySelector('.all-weights-month')
+
+    let content = []
+    for (let i = 0; i < filteredWeights.length; i++) {
+        let date = new Date(filteredWeights[i].date)
+        content.push(`<a data-weight-id="${i}">${date.getUTCDate()}.${date.getMonth()}.${date.getFullYear()} - ${filteredWeights[i].weight} кг</a>`)
+    }
+    allWeightsInMonth.innerHTML = content.join('\n')
 
     let maxValue = Math.max.apply(null, data)
     let minimum = Math.min(...data)
