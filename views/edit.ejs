@@ -1,0 +1,20 @@
+<h1>➕ Редактировать запись веса</h1>
+
+<form action="/edit/confirm" method="post">
+    <input type="hidden" value="<%- _id %>" name="id">
+    <label>Дата:
+        <input type="date" value="<%- date %>" name="date" required>
+    </label>
+    <br>
+    <label>Вес (кг):
+        <input type="number" value="<%- weight %>" name="weight" step="0.1" required>
+    </label>
+    <label>Комментарий:
+        <input type="text" value="<%- comment %>" name="comment" step="0.1">
+    </label>
+    <br>
+    <button type="submit">Сохранить</button>
+</form>
+
+<p><a href="/">⬅ Вернуться</a></p>
+

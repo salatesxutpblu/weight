@@ -147,7 +147,14 @@ router.get('/weights/new', async function(req, res) {
         res.redirect('/login')
         return
     }
-    res.render('new-weight')
+    let newDate = new Date()
+    let year = newDate.getFullYear()
+    let month = newDate.getMonth() + 1
+    let day = newDate.getDate()
+    let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    res.render('new-weight', {
+      date: date
+    })
 })
 router.get('/weights/:year/:month', async function(req, res) {
     let filteredWeights = []
@@ -187,44 +194,29 @@ router.get('/weights/:year/:month', async function(req, res) {
 router.post('/weights/new', async function(req, res) {
     let date = req.body.date
     let weight = req.body.weight
+    let username = getUsername(req)
 
-    if (weight < 0) {
+    if (weight <= 0) {
+        res.render('new-weight', {
+          error: 'Введите корректный вес'
+        })
         return
-        res.send('Введите корректный вес')
     }
 
     let today = new Date();
     let year = today.getFullYear()
     let day = today.getUTCDate()
-    let month = today.getMonth() + 1
+    let month = today.getMonth()
     let newDate = date.split('-')
-    if (Number(newDate[0] < year)) {
-    let fixWeight = Number(weight)
-    let newWeight = new Weight({
-        date: new Date(date),
-        weight: fixWeight
-    })
-    await newWeight.save()
-    res.redirect('/')
-    return
-    }
      if (Number(newDate[0]) > year) {
-        res.send('Введите корректный год')
+      res.render('new-weight', {
+          error: 'Введите корректный год'
+        })
         return        
     }
-    if (Number(newDate[1]) > month) {
-        res.send('Введите корректный месяц')
-        return        
-    }
-    if (Number(newDate[2]) > Number(day)) {
-        res.send('Введите корректный день')
-        return
-    }
-    let username = getUsername(req)
-    let fixWeight = Number(weight)
     let newWeight = new Weight({
         date: new Date(date),
-        weight: fixWeight,
+        weight: Number(weight),
         username: username,
         comment: req.body.comment
     })
@@ -236,6 +228,53 @@ router.get('/logout', isAuthenticated, async function(req, res) {
     req.session.destroy((err) => {
       res.redirect('/login')
   })
+})
+
+
+router.get('/edit/:id', isAuthenticated, async function(req, res) {
+    let id = req.params.id
+    let el = await Weight.findById(id)
+    let newDate = new Date(el.date)
+    let year = newDate.getFullYear()
+    let month = newDate.getMonth() + 1
+    let day = newDate.getDate()
+    let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    console.log(date)
+    let comment = el.comment
+    let weight = el.weight
+    res.render('edit', {
+      date: date,
+      comment: comment,
+      weight: weight,
+      _id: el._id
+    })
+})
+
+router.post('/edit/confirm', async function(req, res) {
+    let el = await Weight.findById(req.body.id)
+    let username = getUsername(req)
+    if (el.username !== username) {
+      res.redirect('/')
+      return
+    }
+
+    el.weight = req.body.weight
+    el.comment = req.body.comment
+    el.date = req.body.date
+
+    await el.save()
+    res.redirect('/')
+})
+
+router.post('/delete/:id', async function(req, res) {
+  let el = await Weight.findById(req.params.id)
+  let username = getUsername(req)
+    if (el.username !== username) {
+      res.redirect('/')
+      return
+    }
+  await Weight.findByIdAndDelete(req.params.id)
+  res.redirect('/')
 })
 
 
