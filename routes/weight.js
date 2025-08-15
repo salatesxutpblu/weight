@@ -60,12 +60,13 @@ router.get('/login', function(req, res) {
 
 router.post('/registration', async function(req, res) {
    let user = await User.findOne({username: req.body.username})
-  
-    if (!user) {
+   console.log(user)
+    if (user) {
       res.render('registration', {
         error: 'Имя пользователя уже занято!'
       })
       return
+      console.log('Имя пользователя уже занято!')
     }
 
   if (!req.body.password.length) {
@@ -153,7 +154,8 @@ router.get('/weights/new', async function(req, res) {
     let day = newDate.getDate()
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     res.render('new-weight', {
-      date: date
+      date: date,
+      error: ''
     })
 })
 router.get('/weights/:year/:month', async function(req, res) {
@@ -198,7 +200,8 @@ router.post('/weights/new', async function(req, res) {
 
     if (weight <= 0) {
         res.render('new-weight', {
-          error: 'Введите корректный вес'
+          error: 'Введите корректный вес',
+          date: date
         })
         return
     }
@@ -210,7 +213,8 @@ router.post('/weights/new', async function(req, res) {
     let newDate = date.split('-')
      if (Number(newDate[0]) > year) {
       res.render('new-weight', {
-          error: 'Введите корректный год'
+          error: 'Введите корректный год',
+          date: date    
         })
         return        
     }
