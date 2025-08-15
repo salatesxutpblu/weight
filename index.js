@@ -20,7 +20,7 @@ app.use(weightRoutes)
 async function start() {
   try {
     await mongoose.connect(
-      'mongodb://localhost:27017/test',
+      'mongodb://localhost:27017/weight',
       {
         useNewUrlParser: true,
         useFindAndModify: false

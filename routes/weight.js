@@ -110,19 +110,19 @@ router.get('/', async function(req, res) {
         let month = ''
         let tempDate = new Date(weights[i].date)
         let year = tempDate.getFullYear()
-        let numberMonth = tempDate.getMonth()
-        if (tempDate.getMonth() === 1) { month = 'Январь' }
-        if (tempDate.getMonth() === 2) { month = 'Февраль' }
-        if (tempDate.getMonth() === 3) { month = 'Март' }
-        if (tempDate.getMonth() === 4) { month = 'Апрель' }
-        if (tempDate.getMonth() === 5) { month = 'Май' }
-        if (tempDate.getMonth() === 6) { month = 'Июнь' }
-        if (tempDate.getMonth() === 7) { month = 'Июль' }
-        if (tempDate.getMonth() === 8) { month = 'Август' }
-        if (tempDate.getMonth() === 9) { month = 'Сентябрь' }
-        if (tempDate.getMonth() === 10) { month = 'Октябрь' }
-        if (tempDate.getMonth() === 11) { month = 'Ноябрь' }
-        if (tempDate.getMonth() === 12) { month = 'Декабрь' }
+        let numberMonth = tempDate.getMonth() + 1
+        if (numberMonth === 1) { month = 'Январь' }
+        if (numberMonth === 2) { month = 'Февраль' }
+        if (numberMonth === 3) { month = 'Март' }
+        if (numberMonth === 4) { month = 'Апрель' }
+        if (numberMonth === 5) { month = 'Май' }
+        if (numberMonth === 6) { month = 'Июнь' }
+        if (numberMonth === 7) { month = 'Июль' }
+        if (numberMonth === 8) { month = 'Август' }
+        if (numberMonth === 9) { month = 'Сентябрь' }
+        if (numberMonth === 10) { month = 'Октябрь' }
+        if (numberMonth === 11) { month = 'Ноябрь' }
+        if (numberMonth === 12) { month = 'Декабрь' }
         if (
         filteredMonthsAndYear.some(
           obj =>
