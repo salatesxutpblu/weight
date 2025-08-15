@@ -137,6 +137,7 @@ router.get('/', async function(req, res) {
 
         }
     }
+    console.log(filteredMonthsAndYear)
     res.render('index', {
         filteredMonthsAndYear
     }
@@ -167,25 +168,28 @@ router.get('/weights/:year/:month', async function(req, res) {
         return
     }
     let weights = await Weight.find().lean()
+    console.log(weights)
     for (let i = 0; i < weights.length; i++) {
     let tempDate = new Date(weights[i].date)
-        if (Number(tempDate.getMonth()) === Number(req.params.month) && Number(tempDate.getFullYear()) === Number(req.params.year) && weights[i].username === username) {
+        if (Number(tempDate.getMonth() + 1) === Number(req.params.month) && Number(tempDate.getFullYear()) === Number(req.params.year) && weights[i].username === username) {
             filteredWeights.push(weights[i])
         }
     }
+    let number = req.params.month + 1
 
-    if (Number(req.params.month) === 1) { month = 'Январь' }
-    if (Number(req.params.month) === 2) { month = 'Февраль' }
-    if (Number(req.params.month) === 3) { month = 'Март' }
-    if (Number(req.params.month) === 4) { month = 'Апрель' }
-    if (Number(req.params.month) === 5) { month = 'Май' }
-    if (Number(req.params.month) === 6) { month = 'Июнь' }
-    if (Number(req.params.month) === 7) { month = 'Июль' }
-    if (Number(req.params.month) === 8) { month = 'Август' }
-    if (Number(req.params.month) === 9) { month = 'Сентябрь' }
-    if (Number(req.params.month) === 10) { month = 'Октябрь' }
-    if (Number(req.params.month) === 11) { month = 'Ноябрь' }
-    if (Number(req.params.month) === 12) { month = 'Декабрь' }
+    if (number === 1) { month = 'Январь' }
+    if (number === 2) { month = 'Февраль' }
+    if (number === 3) { month = 'Март' }
+    if (number === 4) { month = 'Апрель' }
+    if (number === 5) { month = 'Май' }
+    if (number === 6) { month = 'Июнь' }
+    if (number === 7) { month = 'Июль' }
+    if (number === 8) { month = 'Август' }
+    if (number === 9) { month = 'Сентябрь' }
+    if (number === 10) { month = 'Октябрь' }
+    if (number === 11) { month = 'Ноябрь' }
+    if (number === 12) { month = 'Декабрь' }
+    console.log(filteredWeights)
     res.render('month', {
       year: req.params.year,
       month: month,
