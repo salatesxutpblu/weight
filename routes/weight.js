@@ -3,12 +3,16 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 const path = require('path')
 const axios = require('axios');
+const flash = require('connect-flash')
 const session = require('express-session')
 let Weight = require('../models/Weight')
+const bodyParser = require('body-parser')
 let User = require('../models/User')
 const router = Router()
 
 let SALT_WORK_FACTOR = 10
+
+
 
 function getUsername(req) {
   return req.session.user
@@ -29,6 +33,16 @@ router.use(session({
   secret: 'fasdasdfsadsaddsa'
 }))
 
+router.use(bodyParser.urlencoded({ extended: false }));
+
+router.use(flash());
+
+router.use((req, res, next) => {
+  res.locals.success = req.flash('success'); // сообщения об успехе
+  res.locals.error = req.flash('error');     // сообщения об ошибках
+  next();
+});
+
 
 router.post('/login', async function(req, res) {
     let username = req.body.username
@@ -36,16 +50,14 @@ router.post('/login', async function(req, res) {
 
     let user = await User.findOne({username: req.body.username})
     if (!user) {
-      res.render('login', {
-        error: 'Логин или пароль неверные'
-      })
+        req.flash('error', 'Неверный логин или пароль.');
+        res.redirect('/login');
       return
     }
     let passwordIsCorrect = await bcrypt.compare(password, user.password)
     if (!user || passwordIsCorrect === false) {
-      res.render('login', {
-        error: 'Логин или пароль неверные'
-      })
+        req.flash('error', 'Неверный логин или пароль.');
+        res.redirect('/login');
     } else {
       req.session.user = username
       res.redirect('/')
@@ -53,26 +65,31 @@ router.post('/login', async function(req, res) {
 })
 
 router.get('/login', function(req, res) {
-    res.render('login', {
-        error: ''
-    })
+     res.send(`
+    <h1>Login</h1>
+    ${res.locals.error?.length ? `<p style="color:red">${res.locals.error}</p>` : ''}
+     <form action="/login" method="POST">
+        <input type="text" name="username">
+        <input type="password" name="password">
+        <button type="submit">Login</button
+     </form>
+     <a href="/Registration">Registration</a>
+  `);
 })
 
 router.post('/registration', async function(req, res) {
    let user = await User.findOne({username: req.body.username})
    console.log(user)
     if (user) {
-      res.render('registration', {
-        error: 'Имя пользователя уже занято!'
-      })
+      req.flash('error', 'Имя пользователя уже занято');
+        res.redirect('/registration');
       return
       console.log('Имя пользователя уже занято!')
     }
 
   if (!req.body.password.length) {
-    res.render('registration', {
-        error: 'Введите пароль'
-      })
+    req.flash('error', 'Введите пароль');
+        res.redirect('/registration');
     return
   }
 
@@ -89,9 +106,16 @@ router.post('/registration', async function(req, res) {
 
 
 router.get('/registration', function(req, res) {
-    res.render('registration', {
-        error: ''
-    })
+    res.send(`
+    <h1>Registration</h1>
+    ${res.locals.error?.length ? `<p style="color:red">${res.locals.error}</p>` : ''}
+    <form action="/registration" method="POST">
+    <input type="text" name="username">
+    <input type="password" name="password">
+    <button type="submit">Registration</button>
+    </form>
+<a href="/login">Login</a>
+  `);
 })
 
 router.get('/', async function(req, res) {

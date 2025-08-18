@@ -74,8 +74,7 @@ const chart = new Chart(ctx, {
     let content = []
     for (let i = 0; i < filteredWeights.length; i++) {
         let date = new Date(filteredWeights[i].date)
-        content.push(`<a href="/edit/${filteredWeights[i]._id}" data-weight-id="${i}">${date.getUTCDate()}.${date.getMonth() + 1}.${date.getFullYear()} - ${filteredWeights[i].weight} кг</a>
-        <form method="POST" action="/delete/${filteredWeights[i]._id}"><button type="submit">Удалить</button>`)
+        content.push(`<div class="edit-delete-buttons"><a href="/edit/${filteredWeights[i]._id}" data-weight-id="${i}">${date.getUTCDate()}.${date.getMonth() + 1}.${date.getFullYear()} - ${filteredWeights[i].weight} кг</a> <form method="POST" action="/delete/${filteredWeights[i]._id}"><button type="submit">Удалить</button></form></div>`)
     }
     allWeightsInMonth.innerHTML = content.join('\n')
 
