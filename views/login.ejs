@@ -1,9 +1,12 @@
-<div class="container mt-3">
    <div class="row justify-content-center">
       <div class="col-lg-6">
 <form action="/login" method="POST" class="row g-3">
   <div class="mb-3">
-    <h3><%- error %></h3>
+    <% if(error.length > 0){ %>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong><%- error %></strong>
+</div>
+<% } %>
     <label for="staticEmail2" class="sr-only">Username</label>
     <input type="text" name="username" class="form-control">
   </div>
@@ -15,7 +18,6 @@
     <button type="submit" class="btn btn-primary mb-3">Login</button>
   </div>
 </form>
-<a href="/registration">Registration</a>
-</div>
+<a class="text-decoration-none" href="/registration">Registration</a>
 </div>
 </div>

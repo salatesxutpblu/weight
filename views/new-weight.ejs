@@ -1,19 +1,24 @@
-<h1>➕ Добавить запись веса</h1>
-<h2><%- error %></h2>
+<h1 class="font-weight-bold font-weight-bolder">➕ Добавить запись веса</h1>
+<% if(error.length > 0){ %>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong><%- error %></strong>
+</div>
+<% } %>
+
 <form action="/weights/new" method="post">
     <label>Дата:
-        <input type="date" value="<%- date %>" name="date" required>
+        <input class="form-control" type="date" value="<%- date %>" name="date" required>
     </label>
     <br>
     <label>Вес (кг):
-        <input type="number" name="weight" step="0.1" required>
+        <input type="number" class="form-control" name="weight" step="0.1" required>
     </label>
     <label>Комментарий:
-        <input type="text" name="comment" step="0.1">
+        <input type="text" class="form-control" name="comment" step="0.1">
     </label>
     <br>
-    <button type="submit">Сохранить</button>
+    <button class="btn btn-primary mb-3 mt-3" type="submit">Сохранить</button>
 </form>
 
-<p><a href="/">⬅ Вернуться</a></p>
+<p><a class="text-decoration-none" href="/">⬅ Вернуться</a></p>
 

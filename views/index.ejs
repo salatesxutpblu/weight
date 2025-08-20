@@ -1,17 +1,24 @@
 <div class="logout-title">
-<h1>📅 Данные по месяцам</h1>
-<h2 class="logout"><a href="/logout">Logout</a></h2>
-</div>
+    <div class="row">
+    <div class="col-sm-8"><h1>📅 Данные по месяцам</h1></div>
+    <div class="col-sm-4"><h2 class="text-end"><a class="text-decoration-none" href="/logout">Logout</a></h2></div>
+  </div>
 
-    <ul>
+
+</div>
+   <div class="row">
+    <div class="col-lg-3">
+    <ul class="list-group mt-2 mb-2">
             <% filteredMonthsAndYear.forEach(item => { %>
-                <li>
-                    <a href="/weights/<%= item.year %>/<%= item.numberMonth %>">
+                <li class="list-group-item">
+                    <a class="text-decoration-none" href="/weights/<%= item.year %>/<%= item.numberMonth %>">
                         <%= item.month %> <%= item.year %>
                     </a>
                 </li>
             <% }) %>
     </ul>
+    </div>
+    </div>
 
-    <p><a href="/weights/new">➕ Добавить запись</a></p>
+    <p><a class="text-decoration-none" href="/weights/new">➕ Добавить запись</a></p>
 

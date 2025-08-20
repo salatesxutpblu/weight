@@ -62,28 +62,27 @@ const chart = new Chart(ctx, {
 
 <div class="all-weights-month">
 <form method="post">
+    <div class="row">
+        <div class="col-lg-3">
+    <ul class="list-group mt-2 mb-2">
   <% filteredWeights.forEach(i => { %>
-    <div class="edit-delete-buttons">
-      <a href="/edit/<%- i._id %>"><%= i.normaldate %> - <%- i.weight %></a>
-      <button type="submit" formaction="/delete/<%= i._id %>">Удалить</button>
-    </div>
+        <li class="list-group-item">
+      <a class="text-decoration-none" href="/edit/<%- i._id %>"><%= i.normaldate %> - <%- i.weight %> кг</a>
+      <button class="btn btn-primary" type="submit" formaction="/delete/<%= i._id %>">Удалить</button>
+      </li>
   <% }) %>
+  </ul>
+  </div>
+  </div>
 </form>
 </div>
 
-<p><a href="/">⬅ Вернуться к списку месяцев</a></p>
+<p><a class="text-decoration-none" href="/">⬅ Вернуться к списку месяцев</a></p>
 <script>
     let minWeight = document.querySelector('.min-weight')
     let maxWeight = document.querySelector('.max-weight')
     let middleWeight = document.querySelector('.middle-weight')
     let allWeightsInMonth = document.querySelector('.all-weights-month')
-
-    let content = []
-    for (let i = 0; i < filteredWeights.length; i++) {
-        let date = new Date(filteredWeights[i].date)
-        content.push(`<div class="edit-delete-buttons"><a href="/edit/${filteredWeights[i]._id}" data-weight-id="${i}">${date.getUTCDate()}.${date.getMonth() + 1}.${date.getFullYear()} - ${filteredWeights[i].weight} кг</a> <form method="POST" action="/delete/${filteredWeights[i]._id}"><button type="submit">Удалить</button></form></div>`)
-    }
-    allWeightsInMonth.innerHTML = content.join('\n')
 
     let maxValue = Math.max.apply(null, data)
     let minimum = Math.min(...data)
