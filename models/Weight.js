@@ -16,6 +16,10 @@ const schema = new Schema({
   comment: {
     type: String,
     required: false
+  },
+  normaldate: {
+    type: String,
+    required: true
   }
 })
 

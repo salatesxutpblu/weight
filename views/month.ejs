@@ -61,7 +61,14 @@ const chart = new Chart(ctx, {
 <p>⚖ Средний вес: <strong class="middle-weight">75.1 кг</strong></p>
 
 <div class="all-weights-month">
-
+<form method="post">
+  <% filteredWeights.forEach(i => { %>
+    <div class="edit-delete-buttons">
+      <a href="/edit/<%- i._id %>"><%= i.normaldate %> - <%- i.weight %></a>
+      <button type="submit" formaction="/delete/<%= i._id %>">Удалить</button>
+    </div>
+  <% }) %>
+</form>
 </div>
 
 <p><a href="/">⬅ Вернуться к списку месяцев</a></p>

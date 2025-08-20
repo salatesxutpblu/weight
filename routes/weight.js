@@ -6,7 +6,6 @@ const axios = require('axios');
 const flash = require('connect-flash')
 const session = require('express-session')
 let Weight = require('../models/Weight')
-const bodyParser = require('body-parser')
 let User = require('../models/User')
 const router = Router()
 
@@ -33,7 +32,7 @@ router.use(session({
   secret: 'fasdasdfsadsaddsa'
 }))
 
-router.use(bodyParser.urlencoded({ extended: false }));
+router.use(express.urlencoded({ extended: false }))
 
 router.use(flash());
 
@@ -65,16 +64,9 @@ router.post('/login', async function(req, res) {
 })
 
 router.get('/login', function(req, res) {
-     res.send(`
-    <h1>Login</h1>
-    ${res.locals.error?.length ? `<p style="color:red">${res.locals.error}</p>` : ''}
-     <form action="/login" method="POST">
-        <input type="text" name="username">
-        <input type="password" name="password">
-        <button type="submit">Login</button
-     </form>
-     <a href="/Registration">Registration</a>
-  `);
+  res.render('login', {
+    error: res.locals.error
+  })
 })
 
 router.post('/registration', async function(req, res) {
@@ -106,16 +98,9 @@ router.post('/registration', async function(req, res) {
 
 
 router.get('/registration', function(req, res) {
-    res.send(`
-    <h1>Registration</h1>
-    ${res.locals.error?.length ? `<p style="color:red">${res.locals.error}</p>` : ''}
-    <form action="/registration" method="POST">
-    <input type="text" name="username">
-    <input type="password" name="password">
-    <button type="submit">Registration</button>
-    </form>
-<a href="/login">Login</a>
-  `);
+  res.render('registration', {
+    error: res.locals.error
+  })
 })
 
 router.get('/', async function(req, res) {
@@ -134,7 +119,7 @@ router.get('/', async function(req, res) {
         let month = ''
         let tempDate = new Date(weights[i].date)
         let year = tempDate.getFullYear()
-        let numberMonth = tempDate.getMonth() + 1
+        let numberMonth = Number(tempDate.getMonth()) + 1
         if (numberMonth === 1) { month = 'Январь' }
         if (numberMonth === 2) { month = 'Февраль' }
         if (numberMonth === 3) { month = 'Март' }
@@ -175,12 +160,12 @@ router.get('/weights/new', async function(req, res) {
     }
     let newDate = new Date()
     let year = newDate.getFullYear()
-    let month = newDate.getMonth() + 1
+    let month = Number(newDate.getMonth()) + 1
     let day = newDate.getDate()
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     res.render('new-weight', {
       date: date,
-      error: ''
+      error: res.locals.error
     })
 })
 router.get('/weights/:year/:month', async function(req, res) {
@@ -197,9 +182,10 @@ router.get('/weights/:year/:month', async function(req, res) {
     let tempDate = new Date(weights[i].date)
         if (Number(tempDate.getMonth() + 1) === Number(req.params.month) && Number(tempDate.getFullYear()) === Number(req.params.year) && weights[i].username === username) {
             filteredWeights.push(weights[i])
+
         }
     }
-    let number = req.params.month + 1
+    let number = Number(req.params.month) + 1
 
     if (number === 1) { month = 'Январь' }
     if (number === 2) { month = 'Февраль' }
@@ -227,11 +213,9 @@ router.post('/weights/new', async function(req, res) {
     let username = getUsername(req)
 
     if (weight <= 0) {
-        res.render('new-weight', {
-          error: 'Введите корректный вес',
-          date: date
-        })
-        return
+          req.flash('error', 'Введите корректный вес!')    
+          res.redirect('/weights/new')
+          return
     }
 
     let today = new Date();
@@ -240,17 +224,18 @@ router.post('/weights/new', async function(req, res) {
     let month = today.getMonth()
     let newDate = date.split('-')
      if (Number(newDate[0]) > year) {
-      res.render('new-weight', {
-          error: 'Введите корректный год',
-          date: date    
-        })
-        return        
+      req.flash('error', 'Введите корректный год!')    
+      res.redirect('/weights/new')
+      return
     }
+    let a = new Date(date)
+    let normaldate = `${a.getUTCDate()}.${a.getMonth() + 1}.${a.getFullYear()}`
     let newWeight = new Weight({
         date: new Date(date),
         weight: Number(weight),
         username: username,
-        comment: req.body.comment
+        comment: req.body.comment,
+        normaldate: normaldate
     })
     await newWeight.save()
     res.redirect('/')
@@ -268,7 +253,7 @@ router.get('/edit/:id', isAuthenticated, async function(req, res) {
     let el = await Weight.findById(id)
     let newDate = new Date(el.date)
     let year = newDate.getFullYear()
-    let month = newDate.getMonth() + 1
+    let month = Number(newDate.getMonth()) + 1
     let day = newDate.getDate()
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     console.log(date)
@@ -278,11 +263,31 @@ router.get('/edit/:id', isAuthenticated, async function(req, res) {
       date: date,
       comment: comment,
       weight: weight,
-      _id: el._id
+      _id: el._id,
+      error: res.locals.error
     })
 })
 
 router.post('/edit/confirm', async function(req, res) {
+      let date = req.body.date
+    let weight = req.body.weight
+
+    if (weight <= 0) {
+          req.flash('error', 'Введите корректный вес!')    
+          res.redirect(`/edit/${req.body.id}`)
+          return
+    }
+
+    let today = new Date();
+    let year = today.getFullYear()
+    let day = today.getUTCDate()
+    let month = today.getMonth()
+    let newDate = date.split('-')
+     if (Number(newDate[0]) > year) {
+      req.flash('error', 'Введите корректный год!')    
+      res.redirect(`/edit/${req.body.id}`)
+      return
+    }
     let el = await Weight.findById(req.body.id)
     let username = getUsername(req)
     if (el.username !== username) {

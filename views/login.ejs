@@ -1,9 +1,21 @@
-
-    <h1>Login</h1>
-    <h2><%- error %></h2>
-     <form action="/login" method="POST">
-        <input type="text" name="username">
-        <input type="password" name="password">
-        <button type="submit">Login</button
-     </form>
-     <a href="/Registration">Registration</a>
+<div class="container mt-3">
+   <div class="row justify-content-center">
+      <div class="col-lg-6">
+<form action="/login" method="POST" class="row g-3">
+  <div class="mb-3">
+    <h3><%- error %></h3>
+    <label for="staticEmail2" class="sr-only">Username</label>
+    <input type="text" name="username" class="form-control">
+  </div>
+  <div class="mb-3">
+    <label for="inputPassword2" class="sr-only">Password</label>
+    <input type="password" name="password" class="form-control" placeholder="Password">
+  </div>
+  <div class="mb-3">
+    <button type="submit" class="btn btn-primary mb-3">Login</button>
+  </div>
+</form>
+<a href="/registration">Registration</a>
+</div>
+</div>
+</div>
