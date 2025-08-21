@@ -1,5 +1,7 @@
 const { Router } = require('express')
 const express = require('express')
+const mongoose = require('mongoose')
+const Post = require('../models/Post')
 const bcrypt = require('bcrypt')
 const path = require('path')
 const axios = require('axios');
@@ -42,6 +44,9 @@ router.use((req, res, next) => {
   next();
 });
 
+router.get('/create-post', function(req, res) {
+  res.render('create')
+})
 
 router.post('/login', async function(req, res) {
     let username = req.body.username
@@ -71,12 +76,10 @@ router.get('/login', function(req, res) {
 
 router.post('/registration', async function(req, res) {
    let user = await User.findOne({username: req.body.username})
-   console.log(user)
     if (user) {
       req.flash('error', 'Имя пользователя уже занято');
         res.redirect('/registration');
       return
-      console.log('Имя пользователя уже занято!')
     }
 
   if (!req.body.password.length) {
@@ -146,7 +149,6 @@ router.get('/', async function(req, res) {
 
         }
     }
-    console.log(filteredMonthsAndYear)
     res.render('index', {
         filteredMonthsAndYear
     }
@@ -177,7 +179,6 @@ router.get('/weights/:year/:month', async function(req, res) {
         return
     }
     let weights = await Weight.find().lean()
-    console.log(weights)
     for (let i = 0; i < weights.length; i++) {
     let tempDate = new Date(weights[i].date)
         if (Number(tempDate.getMonth() + 1) === Number(req.params.month) && Number(tempDate.getFullYear()) === Number(req.params.year) && weights[i].username === username) {
@@ -199,7 +200,6 @@ router.get('/weights/:year/:month', async function(req, res) {
     if (number === 10) { month = 'Октябрь' }
     if (number === 11) { month = 'Ноябрь' }
     if (number === 12) { month = 'Декабрь' }
-    console.log(filteredWeights)
     res.render('month', {
       year: req.params.year,
       month: month,
@@ -221,6 +221,7 @@ router.post('/weights/new', async function(req, res) {
     let today = new Date();
     let year = today.getFullYear()
     let day = today.getUTCDate()
+    let user = await User.find({username: username})
     let month = today.getMonth()
     let newDate = date.split('-')
      if (Number(newDate[0]) > year) {
@@ -228,14 +229,12 @@ router.post('/weights/new', async function(req, res) {
       res.redirect('/weights/new')
       return
     }
-    let a = new Date(date)
-    let normaldate = `${a.getUTCDate()}.${a.getMonth() + 1}.${a.getFullYear()}`
     let newWeight = new Weight({
         date: new Date(date),
         weight: Number(weight),
-        username: username,
+        user: mongoose.Types.ObjectId(user._id),
         comment: req.body.comment,
-        normaldate: normaldate
+        username: username
     })
     await newWeight.save()
     res.redirect('/')
@@ -256,7 +255,6 @@ router.get('/edit/:id', isAuthenticated, async function(req, res) {
     let month = Number(newDate.getMonth()) + 1
     let day = newDate.getDate()
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    console.log(date)
     let comment = el.comment
     let weight = el.weight
     res.render('edit', {
@@ -311,6 +309,22 @@ router.post('/delete/:id', async function(req, res) {
       return
     }
   await Weight.findByIdAndDelete(req.params.id)
+  res.redirect('/')
+})
+
+router.post('/create', async function(req, res) {
+  let title = req.body.title
+  let description = req.body.description
+  let username = getUsername(req)
+  let user = await User.find({username: username})
+  console.log(description, user)
+  let newPost = new Post({
+    title: title,
+    description: description,
+    user: mongoose.Types.ObjectId(user._id),
+    date: new Date()
+  })
+  await newPost.save()
   res.redirect('/')
 })
 

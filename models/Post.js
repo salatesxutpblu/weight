@@ -1,12 +1,12 @@
 const { Schema, model } = require('mongoose')
 
 const schema = new Schema({
-  date: {
-    type: Date,
+  title: {
+    type: String,
     required: true
   },
-  weight: {
-    type: Number,
+  description: {
+    type: String,
     required: true
   },
   user: {
@@ -14,14 +14,10 @@ const schema = new Schema({
     ref: 'User',  // имя модели пользователя
     required: true
   },
-  comment: {
-    type: String,
-    required: false
-  },
-  username: {
-    type: String,
+  date: {
+    type: Date,
     required: true
   }
 })
 
-module.exports = model('Weight', schema)
+module.exports = model('Post', schema)

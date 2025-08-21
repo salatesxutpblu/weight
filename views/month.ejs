@@ -10,9 +10,13 @@
     filteredWeights.sort(function(a, b) {
         return new Date(a.date) - new Date(b.date);
     })
+    let dates = []
 
     for (let i = 0; i < filteredWeights.length; i++) {
         data.push(filteredWeights[i].weight)
+        let a = new Date(filteredWeights[i].date)
+        console.log(a)
+        dates.push(`${a.getUTCDate()}`)
         comments.push(filteredWeights[i].comment)
     }
 
@@ -22,7 +26,7 @@ const ctx = document.getElementById('weightChart').getContext('2d');
 const chart = new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ["01", "02", "03", "04", "05", "06", "07"],
+        labels: dates,
         datasets: [{
             label: 'Вес (кг)',
             title: 'ddd',
@@ -67,7 +71,7 @@ const chart = new Chart(ctx, {
     <ul class="list-group mt-2 mb-2">
   <% filteredWeights.forEach(i => { %>
         <li class="list-group-item">
-      <a class="text-decoration-none" href="/edit/<%- i._id %>"><%= i.normaldate %> - <%- i.weight %> кг</a>
+      <a class="text-decoration-none" href="/edit/<%- i._id %>"><%= i.date.getUTCDate() + 1 %>.<%= i.date.getMonth() + 1 %>.<%= i.date.getFullYear() %> <%= i.weight %> - кг</a>
       <button class="btn btn-primary" type="submit" formaction="/delete/<%= i._id %>">Удалить</button>
       </li>
   <% }) %>

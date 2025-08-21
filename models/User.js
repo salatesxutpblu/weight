@@ -1,14 +1,17 @@
 const { Schema, model } = require('mongoose')
+const Weight = require('./Weight')
+const mongoose = require('mongoose')
 
-const schema = new Schema({
-  username: {
-    type: String,
-    required: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  password: { type: String, required: true,}
 })
 
-module.exports = model('User', schema)
+userSchema.pre('remove', async function(next) {
+  await Weight.deleteMany({ user: this._id })
+  next()
+})
+
+
+const User = mongoose.model('User', userSchema)
+module.exports = User
