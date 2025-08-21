@@ -186,7 +186,7 @@ router.get('/weights/:year/:month', async function(req, res) {
 
         }
     }
-    let number = Number(req.params.month) + 1
+    let number = Number(req.params.month)
 
     if (number === 1) { month = 'Январь' }
     if (number === 2) { month = 'Февраль' }
@@ -200,6 +200,7 @@ router.get('/weights/:year/:month', async function(req, res) {
     if (number === 10) { month = 'Октябрь' }
     if (number === 11) { month = 'Ноябрь' }
     if (number === 12) { month = 'Декабрь' }
+     console.log(req.params.year, month)
     res.render('month', {
       year: req.params.year,
       month: month,
