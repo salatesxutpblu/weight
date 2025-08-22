@@ -10,6 +10,7 @@ const session = require('express-session')
 let Weight = require('../models/Weight')
 let User = require('../models/User')
 const router = Router()
+let posts = []
 
 let SALT_WORK_FACTOR = 10
 
@@ -305,7 +306,7 @@ router.post('/edit/confirm', async function(req, res) {
 router.post('/delete/:id', async function(req, res) {
   let el = await Weight.findById(req.params.id)
   let username = getUsername(req)
-    if (el.username !== username) {
+    if (String(el.username) !== String(username)) {
       res.redirect('/')
       return
     }
@@ -318,16 +319,106 @@ router.post('/create', async function(req, res) {
   let description = req.body.description
   let username = getUsername(req)
   let user = await User.find({username: username})
-  console.log(description, user)
   let newPost = new Post({
     title: title,
     description: description,
-    user: mongoose.Types.ObjectId(user._id),
+    username: username,
     date: new Date()
   })
   await newPost.save()
   res.redirect('/')
 })
 
+router.get('/posts', async function(req, res) {
+  let pages = []
+  const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const skip = (page - 1) * limit;
+    posts = await Post.find({}).skip(skip).limit(limit).lean()
+    const total = await Post.countDocuments()
+    miniPosts = posts
+    for (let i = 0; i < miniPosts.length; i++) {
+      if (miniPosts[i].description.length > 300) {
+        miniPosts[i].description = miniPosts[i].description.slice(0, 300) + '...'
+      }
+      if (miniPosts[i].title.length > 255) {
+        miniPosts[i].title = miniPosts[i].title.slice(0, 255) + '...'
+      }
+    }
+    let number = total / limit
+    number = Math.floor(number)
+    pages = []
+    let a = getUsername(req)
+    if (a === '') {
+      a = false
+    } else {
+      a = true
+    }
+    for (let i = 1; i < number + 1; i++) {
+      pages.push({
+        number: i
+      })
+    }
+    res.render('posts', {
+      posts,
+      miniPosts,
+      pages,
+      username: getUsername(req),
+      authorized: a,
+      user: getUsername(req)
+    })
+})
+
+router.get('/edit-post/:id', async function(req, res) {
+  let el = await Post.findById(req.params.id)
+  let username = getUsername(req)
+    if (String(el.username) !== String(username)) {
+      res.redirect('/')
+      return
+    }
+  res.render('edit-post', {
+    id: req.params.id,
+    title: el.title,
+    description: el.description
+  })
+})
+
+router.post('/edited/:id', async function(req, res) {
+  let el = await Post.findById(req.params.id)
+  let username = getUsername(req)
+    if (String(el.username) !== String(username)) {
+      res.redirect('/')
+      return
+    }
+
+  el.title = req.body.title
+  el.description = req.body.description
+
+  await el.save()
+  res.redirect('/posts')
+})
+
+router.post('/delete-post/:id', async function(req, res) {
+  let el = await Post.findById(req.params.id)
+  let username = getUsername(req)
+    if (String(el.username) !== String(username)) {
+      res.redirect('/')
+      return
+    }
+
+  let a = await Post.findByIdAndDelete(req.params.id)
+  res.redirect('/posts')
+})
+
+router.get('/posts/:id', async function(req, res) {
+  let el = await Post.findById(req.params.id)
+
+  res.render('singlepost', {
+    title: el.title,
+    description: el.description
+  })
+})
+
+router.get('/page/')
 
 module.exports = router

@@ -9,9 +9,8 @@ const schema = new Schema({
     type: String,
     required: true
   },
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',  // имя модели пользователя
+  username: {
+    type: String,
     required: true
   },
   date: {
