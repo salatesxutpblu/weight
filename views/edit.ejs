@@ -1,0 +1,24 @@
+<h1>➕ Редактировать запись веса</h1>
+<% if(error.length > 0){ %>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong><%- error %></strong>
+</div>
+<% } %>
+
+<form action="/edit/confirm" method="post">
+    <input type="hidden" value="<%- _id %>" name="id">
+    <label>Дата:
+        <input class="form-control" type="date" value="<%- date %>" name="date" required>
+    </label>
+    <br>
+    <label>Вес (кг):
+        <input type="number" class="form-control" name="weight" step="0.1" required>
+    </label>
+    <label>Комментарий:
+        <input type="text" class="form-control" name="comment" step="0.1">
+    </label>
+    <br>
+    <button class="btn btn-primary mb-3 mt-3" type="submit">Сохранить</button>
+</form>
+
+<p><a class="text-decoration-none" href="/">⬅ Вернуться</a></p>
