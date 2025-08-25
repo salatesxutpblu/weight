@@ -94,7 +94,9 @@ router.post('/registration', async function(req, res) {
   let newUser = new User({
     username: username,
     password: await bcrypt.hash(password, await bcrypt.genSalt(SALT_WORK_FACTOR)),
+    id: ''
   })
+  newUser.id = newUser._id
   await newUser.save()
     req.session.user = username
     res.redirect('/')
@@ -113,13 +115,14 @@ router.get('/', async function(req, res) {
         res.redirect('/registration')
         return
     }
+    let user = await User.findOne({username: username})
     let weights = await Weight.find().lean()
     let filteredWeight = []
     let filteredMonthsAndYear = []
 
 
     for (let i = 0; i < weights.length; i++) {
-        if (weights[i].username === username) {
+      if (user.id === weights[i].user) {
         let month = ''
         let tempDate = new Date(weights[i].date)
         let year = tempDate.getFullYear()
@@ -172,9 +175,14 @@ router.get('/weights/new', async function(req, res) {
     })
 })
 router.get('/weights/:year/:month', async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
     let filteredWeights = []
     let month = ''
     let username = getUsername(req)
+    let user = await User.findOne({username: username})
     if (!username) {
         res.redirect('/login')
         return
@@ -182,7 +190,7 @@ router.get('/weights/:year/:month', async function(req, res) {
     let weights = await Weight.find().lean()
     for (let i = 0; i < weights.length; i++) {
     let tempDate = new Date(weights[i].date)
-        if (Number(tempDate.getMonth() + 1) === Number(req.params.month) && Number(tempDate.getFullYear()) === Number(req.params.year) && weights[i].username === username) {
+        if (Number(tempDate.getMonth() + 1) === Number(req.params.month) && Number(tempDate.getFullYear()) === Number(req.params.year) && weights[i].user === user.id) {
             filteredWeights.push(weights[i])
 
         }
@@ -201,7 +209,6 @@ router.get('/weights/:year/:month', async function(req, res) {
     if (number === 10) { month = 'Октябрь' }
     if (number === 11) { month = 'Ноябрь' }
     if (number === 12) { month = 'Декабрь' }
-     console.log(req.params.year, month)
     res.render('month', {
       year: req.params.year,
       month: month,
@@ -210,6 +217,10 @@ router.get('/weights/:year/:month', async function(req, res) {
 })
 
 router.post('/weights/new', async function(req, res) {
+  if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
     let date = req.body.date
     let weight = req.body.weight
     let username = getUsername(req)
@@ -223,7 +234,7 @@ router.post('/weights/new', async function(req, res) {
     let today = new Date();
     let year = today.getFullYear()
     let day = today.getUTCDate()
-    let user = await User.find({username: username})
+    let user = await User.findOne({username: username})
     let month = today.getMonth()
     let newDate = date.split('-')
      if (Number(newDate[0]) > year) {
@@ -231,18 +242,24 @@ router.post('/weights/new', async function(req, res) {
       res.redirect('/weights/new')
       return
     }
+    console.log(user)
     let newWeight = new Weight({
         date: new Date(date),
         weight: Number(weight),
-        user: mongoose.Types.ObjectId(user._id),
+        user: String(user.id),
         comment: req.body.comment,
-        username: username
     })
+  console.log(user._id);
+      
     await newWeight.save()
     res.redirect('/')
 })
 
 router.get('/logout', isAuthenticated, async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
     req.session.destroy((err) => {
       res.redirect('/login')
   })
@@ -250,8 +267,18 @@ router.get('/logout', isAuthenticated, async function(req, res) {
 
 
 router.get('/edit/:id', isAuthenticated, async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
     let id = req.params.id
     let el = await Weight.findById(id)
+    let username = getUsername(req)
+    let user = await User.findOne({username: username})
+    if (el.user !== user.id) {
+      res.redirect('/posts')
+      return
+    }
     let newDate = new Date(el.date)
     let year = newDate.getFullYear()
     let month = Number(newDate.getMonth()) + 1
@@ -269,6 +296,10 @@ router.get('/edit/:id', isAuthenticated, async function(req, res) {
 })
 
 router.post('/edit/confirm', async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
       let date = req.body.date
     let weight = req.body.weight
 
@@ -290,7 +321,8 @@ router.post('/edit/confirm', async function(req, res) {
     }
     let el = await Weight.findById(req.body.id)
     let username = getUsername(req)
-    if (el.username !== username) {
+    let user = await User.findOne({username: username})
+    if (el.user !== user.id) {
       res.redirect('/')
       return
     }
@@ -304,9 +336,14 @@ router.post('/edit/confirm', async function(req, res) {
 })
 
 router.post('/delete/:id', async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
   let el = await Weight.findById(req.params.id)
   let username = getUsername(req)
-    if (String(el.username) !== String(username)) {
+  let user = await User.findOne({username: username})
+    if (el.user !== user.id) {
       res.redirect('/')
       return
     }
@@ -315,21 +352,29 @@ router.post('/delete/:id', async function(req, res) {
 })
 
 router.post('/create', async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
   let title = req.body.title
   let description = req.body.description
   let username = getUsername(req)
-  let user = await User.find({username: username})
+  let user = await User.findOne({username: username})
   let newPost = new Post({
     title: title,
     description: description,
-    username: username,
-    date: new Date()
+    date: new Date(),
+    user: user.id
   })
   await newPost.save()
   res.redirect('/')
 })
 
 router.get('/posts', async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
   let pages = []
   const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 10
@@ -370,9 +415,14 @@ router.get('/posts', async function(req, res) {
 })
 
 router.get('/edit-post/:id', async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
   let el = await Post.findById(req.params.id)
   let username = getUsername(req)
-    if (String(el.username) !== String(username)) {
+  let user = await User.findOne({username: username})
+    if (el.user !== user.id) {
       res.redirect('/')
       return
     }
@@ -384,9 +434,14 @@ router.get('/edit-post/:id', async function(req, res) {
 })
 
 router.post('/edited/:id', async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
   let el = await Post.findById(req.params.id)
   let username = getUsername(req)
-    if (String(el.username) !== String(username)) {
+  let user = await User.findOne({username: username})
+    if (el.user !== user.id) {
       res.redirect('/')
       return
     }
@@ -399,9 +454,14 @@ router.post('/edited/:id', async function(req, res) {
 })
 
 router.post('/delete-post/:id', async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
   let el = await Post.findById(req.params.id)
   let username = getUsername(req)
-    if (String(el.username) !== String(username)) {
+  let user = await User.findOne({username: username})
+    if (el.user !== user.id) {
       res.redirect('/')
       return
     }
@@ -411,6 +471,10 @@ router.post('/delete-post/:id', async function(req, res) {
 })
 
 router.get('/posts/:id', async function(req, res) {
+    if (getUsername(req) === '') {
+    res.redirect('/login')
+    return
+  }
   let el = await Post.findById(req.params.id)
 
   res.render('singlepost', {

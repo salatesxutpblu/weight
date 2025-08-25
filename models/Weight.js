@@ -10,7 +10,7 @@ const schema = new Schema({
     required: true
   },
   user: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: 'User',  // имя модели пользователя
     required: true
   },
@@ -18,10 +18,6 @@ const schema = new Schema({
     type: String,
     required: false
   },
-  username: {
-    type: String,
-    required: true
-  }
 })
 
 module.exports = model('Weight', schema)

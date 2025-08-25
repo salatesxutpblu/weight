@@ -71,7 +71,7 @@ const chart = new Chart(ctx, {
     <ul class="list-group mt-2 mb-2">
   <% filteredWeights.forEach(i => { %>
         <li class="list-group-item d-flex align-items-center gap-3">
-      <a class="text-decoration-none" href="/edit/<%- i._id %>"><%= i.date.getUTCDate() + 1 %>.<%= i.date.getMonth() + 1 %>.<%= i.date.getFullYear() %> - <%= i.weight %> кг</a>
+      <a class="text-decoration-none" href="/edit/<%- i._id %>"><%= i.date.getUTCDate() %>.<%= i.date.getMonth() + 1 %>.<%= i.date.getFullYear() %> - <%= i.weight %> кг</a>
       <button class="btn btn-primary" type="submit" formaction="/delete/<%= i._id %>">Удалить</button>
       </li>
   <% }) %>
