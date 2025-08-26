@@ -10,7 +10,7 @@ const schema = new Schema({
     required: true
   },
   user: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'User',  // имя модели пользователя
     required: true
   },
