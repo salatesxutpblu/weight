@@ -1,35 +1,13 @@
 const { Router } = require('express')
 const express = require('express')
-const Post = require('../models/Post')
 const bcrypt = require('bcrypt')
 const flash = require('connect-flash')
-const session = require('express-session')
+const {isAuthenticated, getUser} = require('../lib')
 let Weight = require('../models/Weight')
 let User = require('../models/User')
 const router = Router()
-let posts = []
 
 let SALT_WORK_FACTOR = 10
-
-
-
-function getUser(req) {
-  return req.session.user
-}
-
-async function isAuthenticated(req, res, next) {
-  let username = req.session.user
-  if (username) {
-    return next()
-  }
-  res.redirect('/login')
-}
-
-router.use(session({
-  resave: false,
-  saveUninitialized: false,
-  secret: 'fasdasdfsadsaddsa'
-}))
 
 router.use(express.urlencoded({ extended: false }))
 
@@ -41,9 +19,6 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get('/create-post', isAuthenticated, function(req, res) {
-  res.render('create')
-})
 
 router.post('/login', async function(req, res) {
     let username = req.body.username
@@ -113,7 +88,7 @@ router.get('/', isAuthenticated, async function(req, res) {
         let month = ''
         let tempDate = new Date(weights[i].date)
         let year = tempDate.getFullYear()
-        let numberMonth = Number(tempDate.getMonth()) + 1
+        let numberMonth = Number(tempDate.getMonth())
         month = getMonthByNumber(numberMonth)
         if (
         filteredMonthsAndYear.some(
@@ -145,34 +120,23 @@ router.get('/weights/new', isAuthenticated, async function(req, res) {
 })
 
 function getMonthByNumber(number) {
-  console.log(number)
-   let month = ''
-   number = Number(number)
-    if (number === 1) { month = 'Январь' }
-    if (number === 2) { month = 'Февраль' }
-    if (number === 3) { month = 'Март' }
-    if (number === 4) { month = 'Апрель' }
-    if (number === 5) { month = 'Май' }
-    if (number === 6) { month = 'Июнь' }
-    if (number === 7) { month = 'Июль' }
-    if (number === 8) { month = 'Август' }
-    if (number === 9) { month = 'Сентябрь' }
-    if (number === 10) { month = 'Октябрь' }
-    if (number === 11) { month = 'Ноябрь' }
-    if (number === 12) { month = 'Декабрь' }
-    return month
+  const date = new Date(2020, number)
+  let val = date.toLocaleString('ru-RU', { month: 'long' })
+  return String(val).charAt(0).toUpperCase() + String(val).slice(1)
 }
 
 router.get('/weights/:year/:month', isAuthenticated, async function(req, res) {
     let user = getUser(req)
-    let startDate = new Date(req.params.year, req.params.month - 1, 1)
-    let endDate = new Date(req.params.year, req.params.month, 1)
+    let startDate = new Date(req.params.year, req.params.month, 1)
+    let endDate = new Date(req.params.year, Number(req.params.month) + 1, 1)
     const filteredWeights = await Weight.find({
       user: user._id,
       date: { $gte: startDate, $lt: endDate }
     }).lean();
     let numberMonth = req.params.month
     let month = getMonthByNumber(numberMonth)
+
+    console.log(filteredWeights)
 
     res.render('month', {
       year: req.params.year,

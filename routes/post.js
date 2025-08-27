@@ -1,25 +1,23 @@
 const { Router } = require('express')
 const express = require('express')
 const Post = require('../models/Post')
-const bcrypt = require('bcrypt')
 const flash = require('connect-flash')
+const {isAuthenticated, getUser} = require('../lib')
 const session = require('express-session')
-let Weight = require('../models/Weight')
 let User = require('../models/User')
-
-async function isAuthenticated(req, res, next) {
-  let username = req.session.user
-  if (username) {
-    return next()
-  }
-  res.redirect('/login')
-}
-
-function getUser(req) {
-  return req.session.user
-}
-
 const router = Router()
+
+
+router.use(isAuthenticated)
+
+
+router.get('/create-post', isAuthenticated, function(req, res) {
+  res.render('create')
+})
+
+router.get('/dddd', function() {
+  res.render('posts')
+})
 
 router.post('/create', isAuthenticated, async function(req, res) {
   let title = req.body.title
