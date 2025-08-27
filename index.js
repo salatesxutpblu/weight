@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const path = require('path')
 const ejsLayouts = require('express-ejs-layouts')
 const weightRoutes = require('./routes/weight')
+const postRoutes = require('./routes/post')
 
 const PORT = process.env.PORT || 3000
 const app = express()
@@ -16,6 +17,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(weightRoutes)
+app.use(postRoutes)
 
 async function start() {
   try {

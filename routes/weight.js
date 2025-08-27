@@ -13,7 +13,7 @@ let SALT_WORK_FACTOR = 10
 
 
 
-function getUsername(req) {
+function getUser(req) {
   return req.session.user
 }
 
@@ -41,7 +41,7 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get('/create-post', function(req, res) {
+router.get('/create-post', isAuthenticated, function(req, res) {
   res.render('create')
 })
 
@@ -72,8 +72,8 @@ router.get('/login', function(req, res) {
 })
 
 router.post('/registration', async function(req, res) {
-    let user = getUsername(req)
-    if (user) {
+    let a = await User.findOne({ username: req.body.username })
+    if (a.username.length) {
       req.flash('error', 'Имя пользователя уже занято');
         res.redirect('/registration');
       return
@@ -104,7 +104,7 @@ router.get('/registration', function(req, res) {
 })
 
 router.get('/', isAuthenticated, async function(req, res) {
-    let user = getUsername(req)
+    let user = getUser(req)
     let weights = await Weight.find({ user: user._id });
     let filteredMonthsAndYear = []
 
@@ -114,18 +114,7 @@ router.get('/', isAuthenticated, async function(req, res) {
         let tempDate = new Date(weights[i].date)
         let year = tempDate.getFullYear()
         let numberMonth = Number(tempDate.getMonth()) + 1
-        if (numberMonth === 1) { month = 'Январь' }
-        if (numberMonth === 2) { month = 'Февраль' }
-        if (numberMonth === 3) { month = 'Март' }
-        if (numberMonth === 4) { month = 'Апрель' }
-        if (numberMonth === 5) { month = 'Май' }
-        if (numberMonth === 6) { month = 'Июнь' }
-        if (numberMonth === 7) { month = 'Июль' }
-        if (numberMonth === 8) { month = 'Август' }
-        if (numberMonth === 9) { month = 'Сентябрь' }
-        if (numberMonth === 10) { month = 'Октябрь' }
-        if (numberMonth === 11) { month = 'Ноябрь' }
-        if (numberMonth === 12) { month = 'Декабрь' }
+        month = getMonthByNumber(numberMonth)
         if (
         filteredMonthsAndYear.some(
           obj =>
@@ -154,19 +143,11 @@ router.get('/weights/new', isAuthenticated, async function(req, res) {
       error: res.locals.error
     })
 })
-router.get('/weights/:year/:month', isAuthenticated, async function(req, res) {
-    let filteredWeights = []
-    let month = ''
-    let user = getUsername(req)
-    let weights = await Weight.find({ user: user._id }).lean()
-    for (let i = 0; i < weights.length; i++) {
-    let tempDate = new Date(weights[i].date)
-        if (Number(tempDate.getMonth() + 1) === Number(req.params.month) && Number(tempDate.getFullYear()) === Number(req.params.year)) {
-            filteredWeights.push(weights[i])
-        }
-    }
-    let number = Number(req.params.month)
 
+function getMonthByNumber(number) {
+  console.log(number)
+   let month = ''
+   number = Number(number)
     if (number === 1) { month = 'Январь' }
     if (number === 2) { month = 'Февраль' }
     if (number === 3) { month = 'Март' }
@@ -179,6 +160,20 @@ router.get('/weights/:year/:month', isAuthenticated, async function(req, res) {
     if (number === 10) { month = 'Октябрь' }
     if (number === 11) { month = 'Ноябрь' }
     if (number === 12) { month = 'Декабрь' }
+    return month
+}
+
+router.get('/weights/:year/:month', isAuthenticated, async function(req, res) {
+    let user = getUser(req)
+    let startDate = new Date(req.params.year, req.params.month - 1, 1)
+    let endDate = new Date(req.params.year, req.params.month, 1)
+    const filteredWeights = await Weight.find({
+      user: user._id,
+      date: { $gte: startDate, $lt: endDate }
+    }).lean();
+    let numberMonth = req.params.month
+    let month = getMonthByNumber(numberMonth)
+
     res.render('month', {
       year: req.params.year,
       month: month,
@@ -198,7 +193,7 @@ router.post('/weights/new', isAuthenticated, async function(req, res) {
 
     let today = new Date();
     let year = today.getFullYear()
-    let user = getUsername(req)
+    let user = getUser(req)
     let newDate = date.split('-')
      if (Number(newDate[0]) > year) {
       req.flash('error', 'Введите корректный год!')    
@@ -217,20 +212,16 @@ router.post('/weights/new', isAuthenticated, async function(req, res) {
 })
 
 router.get('/logout', isAuthenticated, async function(req, res) {
-    if (getUsername(req) === '') {
-    res.redirect('/login')
-    return
-  }
     req.session.destroy((err) => {
       res.redirect('/login')
   })
 })
 
 
-router.get('/edit/:id', isAuthenticated, async function(req, res) {
+router.get('/weights/:id', isAuthenticated, async function(req, res) {
     let id = req.params.id
     let el = await Weight.findById(id)
-    let user = getUsername(req)
+    let user = getUser(req)
     
     if (String(el.user) !== String(user._id)) {
       console.log(el.user, user._id)
@@ -253,7 +244,7 @@ router.get('/edit/:id', isAuthenticated, async function(req, res) {
     })
 })
 
-router.post('/edit/confirm', isAuthenticated, async function(req, res) {
+router.post('/weights', isAuthenticated, async function(req, res) {
       let date = req.body.date
     let weight = req.body.weight
 
@@ -272,7 +263,7 @@ router.post('/edit/confirm', isAuthenticated, async function(req, res) {
       return
     }
     let el = await Weight.findById(req.body.id)
-    let user = getUsername(req)
+    let user = getUser(req)
     if (String(el.user) !== String(user._id)) {
       res.redirect('/')
       return
@@ -288,7 +279,7 @@ router.post('/edit/confirm', isAuthenticated, async function(req, res) {
 
 router.post('/delete/:id', isAuthenticated, async function(req, res) {
   let el = await Weight.findById(req.params.id)
-  let user = getUsername(req)
+  let user = getUser(req)
     if (String(el.user) !== String(user._id)) {
       res.redirect('/')
       return
@@ -297,105 +288,5 @@ router.post('/delete/:id', isAuthenticated, async function(req, res) {
   res.redirect('/')
 })
 
-router.post('/create', isAuthenticated, async function(req, res) {
-  let title = req.body.title
-  let description = req.body.description
-  let user = getUsername(req)
-  let newPost = new Post({
-    title: title,
-    description: description,
-    date: new Date(),
-    user: user._id
-  })
-  await newPost.save()
-  res.redirect('/')
-})
-
-router.get('/posts', isAuthenticated, async function(req, res) {
-  let pages = []
-  const page = parseInt(req.query.page) || 1
-    const limit = parseInt(req.query.limit) || 10
-    const skip = (page - 1) * limit;
-    posts = await Post.find({}).skip(skip).limit(limit).lean()
-    const total = await Post.countDocuments()
-    miniPosts = posts
-    for (let i = 0; i < miniPosts.length; i++) {
-      if (miniPosts[i].description.length > 300) {
-        miniPosts[i].description = miniPosts[i].description.slice(0, 300) + '...'
-      }
-      if (miniPosts[i].title.length > 255) {
-        miniPosts[i].title = miniPosts[i].title.slice(0, 255) + '...'
-      }
-    }
-    let number = total / limit
-    number = Math.floor(number)
-    pages = []
-    let a = getUsername(req)
-    if (a === '') {
-      a = false
-    } else {
-      a = true
-    }
-    for (let i = 1; i < number + 1; i++) {
-      pages.push({
-        number: i
-      })
-    }
-    res.render('posts', {
-      posts,
-      miniPosts,
-      pages,
-    })
-})
-
-router.get('/edit-post/:id', isAuthenticated, async function(req, res) {
-  let el = await Post.findById(req.params.id)
-  let user = getUsername(req)
-    if (String(el.user) !== String(user._id)) {
-      res.redirect('/')
-      return
-    }
-  res.render('edit-post', {
-    id: req.params.id,
-    title: el.title,
-    description: el.description
-  })
-})
-
-router.post('/edited/:id', isAuthenticated, async function(req, res) {
-  let el = await Post.findById(req.params.id)
- let user = getUsername(req)
-    if (String(el.user) !== String(user._id)) {
-      res.redirect('/')
-      return
-    }
-
-  el.title = req.body.title
-  el.description = req.body.description
-
-  await el.save()
-  res.redirect('/posts')
-})
-
-router.post('/delete-post/:id', isAuthenticated, async function(req, res) {
-  let el = await Post.findById(req.params.id)
-  let user = getUsername(req)
-    if (String(el.user) !== String(user._id)) {
-      res.redirect('/')
-      return
-    }
-
-  let a = await Post.findByIdAndDelete(req.params.id)
-  res.redirect('/posts')
-})
-
-router.get('/posts/:id', isAuthenticated, async function(req, res) {
-  let el = await Post.findById(req.params.id)
-
-  res.render('singlepost', {
-    title: el.title,
-    description: el.description
-  })
-})
 
 module.exports = router
