@@ -2,81 +2,14 @@ const { Router } = require('express')
 const express = require('express')
 const bcrypt = require('bcrypt')
 const flash = require('connect-flash')
-const {isAuthenticated, getUser} = require('../lib')
+const {isAuthenticated, getUser, getMonthByNumber} = require('../lib')
 let Weight = require('../models/Weight')
 let User = require('../models/User')
 const router = Router()
 
 let SALT_WORK_FACTOR = 10
 
-router.use(express.urlencoded({ extended: false }))
 
-router.use(flash());
-
-router.use((req, res, next) => {
-  res.locals.success = req.flash('success'); // сообщения об успехе
-  res.locals.error = req.flash('error');     // сообщения об ошибках
-  next();
-});
-
-
-router.post('/login', async function(req, res) {
-    let username = req.body.username
-    let password = req.body.password
-
-    let user = await User.findOne({username: username})
-    if (!user) {
-        req.flash('error', 'Неверный логин или пароль.');
-        res.redirect('/login');
-      return
-    }
-    let passwordIsCorrect = await bcrypt.compare(password, user.password)
-    if (!user || passwordIsCorrect === false) {
-        req.flash('error', 'Неверный логин или пароль.');
-        res.redirect('/login');
-    } else {
-      req.session.user = user
-      res.redirect('/')
-    }
-})
-
-router.get('/login', function(req, res) {
-  res.render('login', {
-    error: res.locals.error
-  })
-})
-
-router.post('/registration', async function(req, res) {
-    let a = await User.findOne({ username: req.body.username })
-    if (a.username.length) {
-      req.flash('error', 'Имя пользователя уже занято');
-        res.redirect('/registration');
-      return
-    }
-
-  if (!req.body.password.length) {
-    req.flash('error', 'Введите пароль');
-        res.redirect('/registration');
-    return
-  }
-
-  let username = req.body.username
-  let password = req.body.password
-  let newUser = new User({
-    username: username,
-    password: await bcrypt.hash(password, await bcrypt.genSalt(SALT_WORK_FACTOR)),
-  })
-  await newUser.save()
-    req.session.user = username
-    res.redirect('/')
-})
-
-
-router.get('/registration', function(req, res) {
-  res.render('registration', {
-    error: res.locals.error
-  })
-})
 
 router.get('/', isAuthenticated, async function(req, res) {
     let user = getUser(req)
@@ -90,19 +23,16 @@ router.get('/', isAuthenticated, async function(req, res) {
         let year = tempDate.getFullYear()
         let numberMonth = Number(tempDate.getMonth())
         month = getMonthByNumber(numberMonth)
-        if (
-        filteredMonthsAndYear.some(
-          obj =>
-            obj.year === year &&
+        if ( !filteredMonthsAndYear.some(
+           obj => 
+            obj.year === year && 
             obj.month === month &&
-            obj.numberMonth === numberMonth
-        )
-        ) {
-        } else {
-        filteredMonthsAndYear.push({ year, month, numberMonth });
-        }
+            obj.numberMonth === numberMonth )
+          ) {
+              filteredMonthsAndYear.push({ year, month, numberMonth });
+          }
     }
-    res.render('index', {
+    res.render('weights/index', {
         filteredMonthsAndYear
     }
     )
@@ -113,17 +43,11 @@ router.get('/weights/new', isAuthenticated, async function(req, res) {
     let month = Number(newDate.getMonth()) + 1
     let day = newDate.getDate()
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    res.render('new-weight', {
+    res.render('weights/new-weight', {
       date: date,
       error: res.locals.error
     })
 })
-
-function getMonthByNumber(number) {
-  const date = new Date(2020, number)
-  let val = date.toLocaleString('ru-RU', { month: 'long' })
-  return String(val).charAt(0).toUpperCase() + String(val).slice(1)
-}
 
 router.get('/weights/:year/:month', isAuthenticated, async function(req, res) {
     let user = getUser(req)
@@ -138,7 +62,7 @@ router.get('/weights/:year/:month', isAuthenticated, async function(req, res) {
 
     console.log(filteredWeights)
 
-    res.render('month', {
+    res.render('weights/month', {
       year: req.params.year,
       month: month,
       filteredWeights
@@ -199,7 +123,7 @@ router.get('/weights/:id', isAuthenticated, async function(req, res) {
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     let comment = el.comment
     let weight = el.weight
-    res.render('edit', {
+    res.render('weights/edit', {
       date: date,
       comment: comment,
       weight: weight,

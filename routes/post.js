@@ -11,15 +11,11 @@ const router = Router()
 router.use(isAuthenticated)
 
 
-router.get('/create-post', isAuthenticated, function(req, res) {
-  res.render('create')
+router.get('/create-post', function(req, res) {
+  res.render('posts/create')
 })
 
-router.get('/dddd', function() {
-  res.render('posts')
-})
-
-router.post('/create', isAuthenticated, async function(req, res) {
+router.post('/create', async function(req, res) {
   let title = req.body.title
   let description = req.body.description
   let user = getUser(req)
@@ -33,7 +29,7 @@ router.post('/create', isAuthenticated, async function(req, res) {
   res.redirect('/')
 })
 
-router.get('/posts', isAuthenticated, async function(req, res) {
+router.get('/posts', async function(req, res) {
   let pages = []
   const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 10
@@ -63,28 +59,28 @@ router.get('/posts', isAuthenticated, async function(req, res) {
         number: i
       })
     }
-    res.render('posts', {
+    res.render('posts/posts', {
       posts,
       miniPosts,
       pages,
     })
 })
 
-router.get('/edit-post/:id', isAuthenticated, async function(req, res) {
+router.get('/edit-post/:id', async function(req, res) {
   let el = await Post.findById(req.params.id)
   let user = getUser(req)
     if (String(el.user) !== String(user._id)) {
       res.redirect('/')
       return
     }
-  res.render('edit-post', {
+  res.render('posts/edit-post', {
     id: req.params.id,
     title: el.title,
     description: el.description
   })
 })
 
-router.post('/edited/:id', isAuthenticated, async function(req, res) {
+router.post('/edited/:id', async function(req, res) {
   let el = await Post.findById(req.params.id)
  let user = getUser(req)
     if (String(el.user) !== String(user._id)) {
@@ -99,7 +95,7 @@ router.post('/edited/:id', isAuthenticated, async function(req, res) {
   res.redirect('/posts')
 })
 
-router.post('/delete-post/:id', isAuthenticated, async function(req, res) {
+router.post('/delete-post/:id', async function(req, res) {
   let el = await Post.findById(req.params.id)
   let user = getUser(req)
     if (String(el.user) !== String(user._id)) {
@@ -111,10 +107,10 @@ router.post('/delete-post/:id', isAuthenticated, async function(req, res) {
   res.redirect('/posts')
 })
 
-router.get('/posts/:id', isAuthenticated, async function(req, res) {
+router.get('/posts/:id', async function(req, res) {
   let el = await Post.findById(req.params.id)
 
-  res.render('singlepost', {
+  res.render('posts/singlepost', {
     title: el.title,
     description: el.description
   })
