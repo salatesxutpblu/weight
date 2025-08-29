@@ -6,8 +6,8 @@
                     <a class="fs-2" href="/posts/<%= item._id %>"><%- item.title %> </a>
                     <div><%- item.description %></div>
                     <div class="d-flex gap-2">
-                      <button class="btn btn-primary mb-3" type="submit"><a class="text-white text-decoration-none" href="/edit-post/<%= item._id %>">Редактировать</a></button>
-                        <form method="POST" action="/delete-post/<%= item._id %>">
+                      <button class="btn btn-primary mb-3" type="submit"><a class="text-white text-decoration-none" href="/posts/update/<%= item._id %>">Редактировать</a></button>
+                        <form method="POST" action="/posts/delete/<%= item._id %>">
                         <button class="btn btn-danger mb-3" type="submit">Удалить</button>
                         </form>
                         </div>

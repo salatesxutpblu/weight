@@ -64,4 +64,10 @@ router.get('/registration', function(req, res) {
   })
 })
 
+router.get('/logout', isAuthenticated, async function(req, res) {
+    req.session.destroy((err) => {
+      res.redirect('/login')
+  })
+})
+
 module.exports = router

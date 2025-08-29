@@ -37,13 +37,13 @@ router.get('/', isAuthenticated, async function(req, res) {
     }
     )
 })
-router.get('/weights/new', isAuthenticated, async function(req, res) {
+router.get('/weights/create', isAuthenticated, async function(req, res) {
     let newDate = new Date()
     let year = newDate.getFullYear()
     let month = Number(newDate.getMonth()) + 1
     let day = newDate.getDate()
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    res.render('weights/new-weight', {
+    res.render('weights/create', {
       date: date,
       error: res.locals.error
     })
@@ -60,16 +60,15 @@ router.get('/weights/:year/:month', isAuthenticated, async function(req, res) {
     let numberMonth = req.params.month
     let month = getMonthByNumber(numberMonth)
 
-    console.log(filteredWeights)
 
-    res.render('weights/month', {
+    res.render('weights/show', {
       year: req.params.year,
       month: month,
       filteredWeights
     })
 })
 
-router.post('/weights/new', isAuthenticated, async function(req, res) {
+router.post('/weights/create', isAuthenticated, async function(req, res) {
     let date = req.body.date
     let weight = req.body.weight
 
@@ -99,11 +98,6 @@ router.post('/weights/new', isAuthenticated, async function(req, res) {
     res.redirect('/')
 })
 
-router.get('/logout', isAuthenticated, async function(req, res) {
-    req.session.destroy((err) => {
-      res.redirect('/login')
-  })
-})
 
 
 router.get('/weights/:id', isAuthenticated, async function(req, res) {
@@ -112,7 +106,6 @@ router.get('/weights/:id', isAuthenticated, async function(req, res) {
     let user = getUser(req)
     
     if (String(el.user) !== String(user._id)) {
-      console.log(el.user, user._id)
       res.redirect('/')
       return
     }
@@ -123,7 +116,7 @@ router.get('/weights/:id', isAuthenticated, async function(req, res) {
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     let comment = el.comment
     let weight = el.weight
-    res.render('weights/edit', {
+    res.render('weights/update', {
       date: date,
       comment: comment,
       weight: weight,
@@ -132,13 +125,13 @@ router.get('/weights/:id', isAuthenticated, async function(req, res) {
     })
 })
 
-router.post('/weights', isAuthenticated, async function(req, res) {
+router.post('/weights/update', isAuthenticated, async function(req, res) {
       let date = req.body.date
     let weight = req.body.weight
 
     if (weight <= 0) {
           req.flash('error', 'Введите корректный вес!')    
-          res.redirect(`/edit/${req.body.id}`)
+          res.redirect(`/weights/update/${req.body.id}`)
           return
     }
 
@@ -165,7 +158,7 @@ router.post('/weights', isAuthenticated, async function(req, res) {
     res.redirect('/')
 })
 
-router.post('/delete/:id', isAuthenticated, async function(req, res) {
+router.post('/weights/delete/:id', isAuthenticated, async function(req, res) {
   let el = await Weight.findById(req.params.id)
   let user = getUser(req)
     if (String(el.user) !== String(user._id)) {

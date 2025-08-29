@@ -10,12 +10,11 @@ const router = Router()
 
 router.use(isAuthenticated)
 
-
-router.get('/create-post', function(req, res) {
+router.get('/posts/create', function(req, res) {
   res.render('posts/create')
 })
 
-router.post('/create', async function(req, res) {
+router.post('/posts/create', async function(req, res) {
   let title = req.body.title
   let description = req.body.description
   let user = getUser(req)
@@ -59,28 +58,28 @@ router.get('/posts', async function(req, res) {
         number: i
       })
     }
-    res.render('posts/posts', {
+    res.render('posts/index', {
       posts,
       miniPosts,
       pages,
     })
 })
 
-router.get('/edit-post/:id', async function(req, res) {
+router.get('/posts/update/:id', async function(req, res) {
   let el = await Post.findById(req.params.id)
   let user = getUser(req)
     if (String(el.user) !== String(user._id)) {
       res.redirect('/')
       return
     }
-  res.render('posts/edit-post', {
+  res.render('posts/update', {
     id: req.params.id,
     title: el.title,
     description: el.description
   })
 })
 
-router.post('/edited/:id', async function(req, res) {
+router.post('/posts/update/:id', async function(req, res) {
   let el = await Post.findById(req.params.id)
  let user = getUser(req)
     if (String(el.user) !== String(user._id)) {
@@ -95,7 +94,7 @@ router.post('/edited/:id', async function(req, res) {
   res.redirect('/posts')
 })
 
-router.post('/delete-post/:id', async function(req, res) {
+router.post('/posts/delete/:id', async function(req, res) {
   let el = await Post.findById(req.params.id)
   let user = getUser(req)
     if (String(el.user) !== String(user._id)) {
@@ -110,7 +109,7 @@ router.post('/delete-post/:id', async function(req, res) {
 router.get('/posts/:id', async function(req, res) {
   let el = await Post.findById(req.params.id)
 
-  res.render('posts/singlepost', {
+  res.render('posts/show', {
     title: el.title,
     description: el.description
   })

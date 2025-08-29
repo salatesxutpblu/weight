@@ -1,11 +1,12 @@
-<h1 class="font-weight-bold font-weight-bolder">➕ Добавить запись веса</h1>
+<h1>➕ Редактировать запись веса</h1>
 <% if(error.length > 0){ %>
 <div class="alert alert-warning alert-dismissible fade show" role="alert">
   <strong><%- error %></strong>
 </div>
 <% } %>
 
-<form action="/weights/new" method="post">
+<form action="/weights/update" method="post">
+    <input type="hidden" value="<%- _id %>" name="id">
     <label>Дата:
         <input class="form-control" type="date" value="<%- date %>" name="date" required>
     </label>
@@ -21,4 +22,3 @@
 </form>
 
 <p><a class="text-decoration-none" href="/">⬅ Вернуться</a></p>
-
