@@ -11,7 +11,9 @@ const router = Router()
 router.use(isAuthenticated)
 
 router.get('/posts/create', function(req, res) {
-  res.render('posts/create')
+  res.render('posts/form', {
+    id_: null
+  })
 })
 
 router.post('/posts/create', async function(req, res) {
@@ -25,7 +27,7 @@ router.post('/posts/create', async function(req, res) {
     user: user._id
   })
   await newPost.save()
-  res.redirect('/')
+  res.redirect('/posts')
 })
 
 router.get('/posts', async function(req, res) {
@@ -72,15 +74,15 @@ router.get('/posts/update/:id', async function(req, res) {
       res.redirect('/')
       return
     }
-  res.render('posts/update', {
-    id: req.params.id,
+  res.render('posts/form', {
+    id_: req.params.id,
     title: el.title,
     description: el.description
   })
 })
 
-router.post('/posts/update/:id', async function(req, res) {
-  let el = await Post.findById(req.params.id)
+router.post('/posts/update', async function(req, res) {
+  let el = await Post.findById(req.body.id)
  let user = getUser(req)
     if (String(el.user) !== String(user._id)) {
       res.redirect('/')

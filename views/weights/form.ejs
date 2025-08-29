@@ -1,0 +1,30 @@
+<h1 class="font-weight-bold font-weight-bolder">
+  <%- id_ ? '➕ Редактировать запись веса' : '➕ Добавить запись веса' %>
+</h1>
+
+<% if(error.length > 0){ %>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong><%- error %></strong>
+</div>
+<% } %>
+
+<form action="<%- id_ ? '/weights/update' : '/weights/create' %>" method="post">
+    <% if (id_) { %>
+    <input type="hidden" value="<%- id_ %>" name="id">
+    <% } %>
+    
+    <label>Дата:
+        <input class="form-control" type="date" value="<%- date %>" name="date" required>
+    </label>
+    <br>
+    <label>Вес (кг):
+        <input type="number" class="form-control" name="weight" step="0.1" value="<%- weight %>" required>
+    </label>
+    <label>Комментарий:
+        <input type="text" class="form-control" name="comment" value="<%- comment %>" step="0.1">
+    </label>
+    <br>
+    <button class="btn btn-primary mb-3 mt-3" type="submit">Сохранить</button>
+</form>
+
+<p><a class="text-decoration-none" href="/">⬅️ Вернуться</a></p>

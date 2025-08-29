@@ -43,9 +43,12 @@ router.get('/weights/create', isAuthenticated, async function(req, res) {
     let month = Number(newDate.getMonth()) + 1
     let day = newDate.getDate()
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    res.render('weights/create', {
+    res.render('weights/form', {
       date: date,
-      error: res.locals.error
+      error: res.locals.error,
+      id_: null,
+      weight: null,
+      comment: null
     })
 })
 
@@ -116,11 +119,11 @@ router.get('/weights/:id', isAuthenticated, async function(req, res) {
     let date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     let comment = el.comment
     let weight = el.weight
-    res.render('weights/update', {
+    res.render('weights/form', {
       date: date,
       comment: comment,
       weight: weight,
-      _id: el._id,
+      id_: el._id,
       error: res.locals.error
     })
 })
